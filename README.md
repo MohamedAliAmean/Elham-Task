@@ -291,11 +291,20 @@ frontend/      optional Next.js + Tailwind demo client (separate package, see 8b
 
 ## 12. AI disclosure
 
-I used an AI coding assistant (Cursor) to scaffold the project and draft code, tests, and documentation.
-I reviewed every file, and I understand the key design decisions and can explain them: the partial unique index for
-concurrency, the conditional-update cancel, and emitting events after commit. I verified the behavior by:
+I used an AI coding assistant inside the Cursor editor to write most of the code, tests, and documentation, based on
+my instructions and the challenge requirements.
 
-- running the e2e suite against a real PostgreSQL database, repeatedly;
-- manually testing every endpoint and error case with `curl`;
-- running the concurrent-booking script with the Socket.IO listener;
-- dropping the partial unique index to confirm that the concurrency tests catch a double booking, then restoring it.
+How I reviewed and tested the output:
+
+- I reviewed the files, and I understand the key decisions and can explain them:
+  - double-booking prevention through a PostgreSQL partial unique index on `slotId` for active bookings only;
+  - cancellation through a conditional update (`WHERE status = 'active'`), which makes it safe and idempotent;
+  - emitting Socket.IO events only after the database change succeeds.
+- I ran the automated suite (29 e2e tests) against a real PostgreSQL database several times, including the concurrent-requests test.
+- I checked that the concurrency test is meaningful. With the index temporarily dropped the test failed (20 of 20
+  requests got `201`), and after restoring the index it passed.
+- I tested every endpoint and error case manually through Swagger UI and `curl`. I also ran the concurrent-booking script
+  (one `201`, nine `409`s) with the Socket.IO listener, to confirm each event arrives exactly once.
+- I extracted the ZIP into a fresh folder, did a clean install, and ran the tests against an empty database, to confirm the project is easy to run.
+
+I take responsibility for the final code and can explain and modify it.
