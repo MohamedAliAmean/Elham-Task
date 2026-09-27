@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BookingStatus {
+  active
+  cancelled
+}
+
+/// A fixed, pre-seeded appointment slot.
+/// DB constraint (migration SQL): CHECK ("endsAt" > "startsAt").
+model Slot {
+  id        String    @id @default(uuid()) @db.Uuid
+  startsAt  DateTime  @db.Timestamptz(3)
+  endsAt    DateTime  @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  bookings  Booking[]
+
+  @@index([startsAt, id])
+}
+
+/// Bookings are never deleted; cancelling only flips the status so history stays reachable by id.
+/// DB constraint (migration SQL): at most one row per slot with status = 'active'
+/// (partial unique index "Booking_one_active_per_slot"), which is what prevents double booking.
+model Booking {
+  id            String        @id @default(uuid()) @db.Uuid
+  slotId        String        @db.Uuid
+  customerName  String
+  customerEmail String
+  status        BookingStatus @default(active)
+  createdAt     DateTime      @default(now()) @db.Timestamptz(3)
+  cancelledAt   DateTime?     @db.Timestamptz(3)
+  slot          Slot          @relation(fields: [slotId], references: [id], onDelete: Restrict)
+
+  @@index([slotId])
+}

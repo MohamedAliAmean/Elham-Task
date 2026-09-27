@@ -1,0 +1,17 @@
+# Optional: local PostgreSQL for development and tests. Any PostgreSQL 14+ works.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: booking
+      POSTGRES_PASSWORD: booking
+      POSTGRES_DB: booking
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./docker/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booking -d booking"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
