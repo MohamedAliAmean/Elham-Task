@@ -278,15 +278,22 @@ frontend/      optional Next.js + Tailwind demo client (separate package, see 8b
 
 ## 11. Actual time spent and incomplete parts
 
-- **Actual time:** _fill in your real time here, e.g. "2 h 40 min"_
-- **Incomplete parts:** none known. All required endpoints, error codes, concurrency guarantee, idempotent cancellation,
-  Socket.IO events, OpenAPI docs (`/docs`, `/openapi.json`) and the three required automated tests are implemented and passing.
+- **Actual time:** about **1 hour** (roughly 12:00 to 12:50), covering implementation, tests, documentation, code review,
+  and the optional frontend. Implementation was AI-assisted (Cursor). I reviewed the code, ran the tests, and verified the behavior manually myself.
+- **Incomplete parts:** none. All requirements are implemented and tested: 29 passing e2e tests against a real
+  PostgreSQL database, including the concurrent-requests test.
+- **Known limitations:**
+  - Socket.IO events have no durable delivery or replay, which the spec allows. The frontend re-fetches slots on reconnect.
+  - `customerEmail` is stored as entered after trimming only. It is not lowercased.
+  - The optional frontend (not required) keeps the user's bookings in `localStorage`, because there is no "list bookings"
+    endpoint and no authentication.
+  - Prisma 6 prints a deprecation warning about the `package.json#prisma` config. It doesn't affect anything.
 
 ## 12. AI disclosure
 
-_Fill in honestly, for example:_ I used an AI coding assistant (Cursor with Claude) to scaffold the project and draft code,
-tests, and documentation. I reviewed every file, and I made the key design decisions and understand them: the partial
-unique index for concurrency, the conditional-update cancel, and emitting events after commit. I verified the behavior by:
+I used an AI coding assistant (Cursor) to scaffold the project and draft code, tests, and documentation.
+I reviewed every file, and I understand the key design decisions and can explain them: the partial unique index for
+concurrency, the conditional-update cancel, and emitting events after commit. I verified the behavior by:
 
 - running the e2e suite against a real PostgreSQL database, repeatedly;
 - manually testing every endpoint and error case with `curl`;

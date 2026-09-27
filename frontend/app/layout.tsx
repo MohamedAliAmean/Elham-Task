@@ -9,7 +9,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl">
-      <body className="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased">{children}</body>
+      {/* Browser extensions (e.g. ColorZilla) inject attributes into <body> before hydration. */}
+      <body className="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }
